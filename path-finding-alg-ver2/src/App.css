@@ -1,28 +1,22 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+body {
+  background-color: blueviolet;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.topBar {
+  height: 50px;
 }
 
-
-.card {
-  padding: 2em;
+.gridHolder {
+  display: flex;
+  background-color: aqua;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
 }
 
-.read-the-docs {
-  color: #888;
+.gridRow {
+
+  display: inline-grid;
+
 }
+

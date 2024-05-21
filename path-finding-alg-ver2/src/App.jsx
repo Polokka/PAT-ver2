@@ -72,12 +72,20 @@ function App() {
   let startRef = useRef(0);
   let endRef = useRef(7);
 
+  const gridArray = Object.values(grid).map((row) => Object.values(row));
+
   return (
-    <>
+    <><div className='topBar'></div>
       <div className="gridHolder">
-        {grid.map((elem) => {
-          return elem;
-        })}
+      {gridArray.map((row, rowIndex) => (
+          <div key={`Row${rowIndex}`} className="gridRow">
+            {row.map((cell, colIndex) => (
+              <div key={`Col${colIndex}`} className="gridCell">
+                {cell.Kissa}
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
     </>
   )
