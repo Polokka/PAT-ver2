@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import './App.css'
+import { useState, useRef } from "react";
+import "./App.scss";
 
 /*
 TOP LEVEL STUFF
@@ -31,65 +31,85 @@ ALGORYMIT
 Mitä näitä ny on
 */
 
-
-
 const GridNodes = ({ cols, rows }) => {
   let grid = {};
 
   for (let i = 0; i < rows; i++) {
-    let rowKey = `Row${i}`
-    grid[rowKey] = {}
+    let rowKey = `Row${i}`;
+    grid[rowKey] = {};
     for (let j = 0; j < cols; j++) {
-      let nodeKey = `Col${j}`
-      grid[rowKey][nodeKey] = {Kissa: "Kissa"}
+      let nodeKey = `Col${j}`;
+      grid[rowKey][nodeKey] = { Id: i * cols + j, Status: "Kissa" };
     }
   }
-  console.log(grid)
+  console.log(grid);
   return grid;
-
-}
-
-
-
+};
 
 function App() {
-
   const cols = 5;
   const rows = 5;
 
-  GridNodes({cols, rows})
+  GridNodes({ cols, rows });
 
-  let grid = GridNodes({cols, rows})
-  
+  let grid = GridNodes({ cols, rows });
+
   const status = {
     NEUTRAL: "Neutral",
     IS_START: "isStart",
     IS_END: "isEnd",
     IS_WALL: "Wall",
     ON_PATH: "Path",
-  }
+  };
 
+  const [mode, setMode] = useState(status.NEUTRAL);
   let startRef = useRef(0);
   let endRef = useRef(7);
+
+  function selectStatus(startRef, endRef, id) {
+    if (id == startRef.current) {
+      setMode(status.IS_START);
+    }
+  }
+
+  let tileColorClass = "";
+  switch (mode) {
+    case "Neutral":
+      tileColorClass = "neutralNode";
+      break;
+    case "isStart":
+      tileColorClass = "startNode";
+      break;
+    case "isEnd":
+      tileColorClass = "endNode";
+      break;
+    case "isEnd":
+      tileColorClass = "endNode";
+      break;
+    case "Path":
+      tileColorClass = "pathNode";
+    default:
+      console.log("Kissa");
+  }
 
   const gridArray = Object.values(grid).map((row) => Object.values(row));
 
   return (
-    <><div className='topBar'></div>
+    <>
+      <div className="topBar"></div>
       <div className="gridHolder">
-      {gridArray.map((row, rowIndex) => (
+        {gridArray.map((row, rowIndex) => (
           <div key={`Row${rowIndex}`} className="gridRow">
             {row.map((cell, colIndex) => (
               <div key={`Col${colIndex}`} className="gridCell">
-                {cell.Kissa}
+                {mode}
               </div>
             ))}
           </div>
         ))}
       </div>
     </>
-  )
-
+  );
 }
 
-export default App
+export default App;
