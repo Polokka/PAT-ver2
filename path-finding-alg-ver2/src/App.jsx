@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./App.scss";
 
 /*
@@ -39,7 +39,7 @@ const GridNodes = ({ cols, rows }) => {
     grid[rowKey] = {};
     for (let j = 0; j < cols; j++) {
       let nodeKey = `Col${j}`;
-      grid[rowKey][nodeKey] = { Id: i * cols + j, Status: "Kissa" };
+      grid[rowKey][nodeKey] = { Id: i * cols + j, Status: "" };
     }
   }
   console.log(grid);
@@ -48,9 +48,7 @@ const GridNodes = ({ cols, rows }) => {
 
 function App() {
   const cols = 5;
-  const rows = 5;
-
-  GridNodes({ cols, rows });
+  const rows = 7;
 
   let grid = GridNodes({ cols, rows });
 
@@ -64,33 +62,17 @@ function App() {
 
   const [mode, setMode] = useState(status.NEUTRAL);
   let startRef = useRef(0);
-  let endRef = useRef(7);
+  let endRef = useRef(24);
 
-  function selectStatus(startRef, endRef, id) {
-    if (id == startRef.current) {
-      setMode(status.IS_START);
+  function tileColorClassSelection(colIndex) {
+    if (colIndex == startRef.current) {
+      return "startNode";
+    } else {
+      return "neutralNode";
     }
   }
 
-  let tileColorClass = "";
-  switch (mode) {
-    case "Neutral":
-      tileColorClass = "neutralNode";
-      break;
-    case "isStart":
-      tileColorClass = "startNode";
-      break;
-    case "isEnd":
-      tileColorClass = "endNode";
-      break;
-    case "isEnd":
-      tileColorClass = "endNode";
-      break;
-    case "Path":
-      tileColorClass = "pathNode";
-    default:
-      console.log("Kissa");
-  }
+  useEffect(() => {}, [startRef]);
 
   const gridArray = Object.values(grid).map((row) => Object.values(row));
 
@@ -101,7 +83,10 @@ function App() {
         {gridArray.map((row, rowIndex) => (
           <div key={`Row${rowIndex}`} className="gridRow">
             {row.map((cell, colIndex) => (
-              <div key={`Col${colIndex}`} className="gridCell">
+              <div
+                key={`Col${colIndex}`}
+                className={`${tileColorClassSelection(cell.Id)} gridCell`}
+              >
                 {mode}
               </div>
             ))}
@@ -113,3 +98,41 @@ function App() {
 }
 
 export default App;
+
+/*switch (mode) {
+  case "Neutral":
+    tileColorClass = "neutralNode";
+    break;
+  case "isStart":
+    tileColorClass = "startNode";
+    break;
+  case "isEnd":
+    tileColorClass = "endNode";
+    break;
+  case "isEnd":
+    tileColorClass = "endNode";
+    break;
+  case "Path":
+    tileColorClass = "pathNode";
+  default:
+    console.log("Kissa");
+}
+
+  let tileColorClass = "";
+
+
+
+  function selectStatus(startRef, endRef, grid) {
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        let node = grid[`Row${i}`][`Col${j}`];
+        if (node.Id == startRef.current) {
+          grid[`Row${i}`][`Col${j}`].Status = status.IS_START;
+          console.log(grid.Row0.Col0.Status);
+        } else {
+          node.Status = status.NEUTRAL;
+        }
+      }
+    }
+  }
+*/
