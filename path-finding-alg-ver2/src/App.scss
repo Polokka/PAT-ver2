@@ -1,8 +1,11 @@
-body {
+  * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
-  
-  .topBar {
-    height: 50px;
+    .topBar {
+    height: 60px;
   }
   
   .gridHolder {
@@ -28,4 +31,16 @@ body {
   
   .startNode {
     background-color: green;
+  }
+
+  .neutralNode {
+    background-color: yellow;
+  }
+
+  .endNode {
+    background-color: red;
+  }
+
+  .wallNode {
+    background-color: grey;
   }

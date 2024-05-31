@@ -47,48 +47,86 @@ const GridNodes = ({ cols, rows }) => {
 };
 
 function App() {
-  const cols = 5;
-  const rows = 7;
+  const cols = 15;
+  const rows = 15;
 
-  let grid = GridNodes({ cols, rows });
+  const grid = GridNodes({ cols, rows });
 
-  const status = {
-    NEUTRAL: "Neutral",
-    IS_START: "isStart",
-    IS_END: "isEnd",
-    IS_WALL: "Wall",
-    ON_PATH: "Path",
-  };
-
-  const [mode, setMode] = useState(status.NEUTRAL);
-  let startRef = useRef(0);
-  let endRef = useRef(24);
+  //Status Click&Drag
+  const [startRef, setStartRef] = useState(0);
+  const [endRef, setEndRef] = useState(10);
+  const [draggingStart, setDraggingStart] = useState(false);
+  const [draggingEnd, setDraggingEnd] = useState(false);
+  const [draggingWall, setDraggingWall] = useState(false);
+  const [wallNodes, setWallNodes] = useState([]);
 
   function tileColorClassSelection(colIndex) {
-    if (colIndex == startRef.current) {
+    if (colIndex == startRef) {
       return "startNode";
+    } else if (colIndex == endRef) {
+      return "endNode";
+    } else if (wallNodes.includes(colIndex)) {
+      return "wallNode";
     } else {
       return "neutralNode";
     }
   }
 
-  useEffect(() => {}, [startRef]);
+  const handleMouseDown = (nodeId) => {
+    if (nodeId == startRef) {
+      setDraggingStart(true);
+    } else if (nodeId == endRef) {
+      setDraggingEnd(true);
+    } else if (nodeId) {
+      setDraggingWall(true);
+      setWallNodes([...wallNodes, nodeId]);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setDraggingStart(false);
+    setDraggingEnd(false);
+    setDraggingWall(false);
+  };
+
+  const handleMouseEnter = (nodeId) => {
+    if (draggingStart) {
+      setStartRef(nodeId);
+    } else if (draggingEnd) {
+      setEndRef(nodeId);
+    } else if (draggingWall && !wallNodes.includes(nodeId)) {
+      setWallNodes([...wallNodes, nodeId]);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setDraggingStart(false);
+    setDraggingEnd(false);
+    setDraggingWall(false);
+  };
+
+  const clearWall = () => {
+    setWallNodes([]);
+  };
 
   const gridArray = Object.values(grid).map((row) => Object.values(row));
 
   return (
     <>
-      <div className="topBar"></div>
-      <div className="gridHolder">
+      <div className="topBar" onClick={() => clearWall()}>
+        ClearButton
+      </div>
+      <div className="gridHolder" onMouseLeave={handleMouseLeave}>
         {gridArray.map((row, rowIndex) => (
           <div key={`Row${rowIndex}`} className="gridRow">
             {row.map((cell, colIndex) => (
               <div
                 key={`Col${colIndex}`}
                 className={`${tileColorClassSelection(cell.Id)} gridCell`}
-              >
-                {mode}
-              </div>
+                onMouseDown={() => handleMouseDown(cell.Id)}
+                onMouseUp={handleMouseUp}
+                onMouseEnter={() => handleMouseEnter(cell.Id)}
+              ></div>
             ))}
           </div>
         ))}
@@ -135,4 +173,15 @@ export default App;
       }
     }
   }
+
+
+    const status = {
+    NEUTRAL: "Neutral",
+    IS_START: "isStart",
+    IS_END: "isEnd",
+    IS_WALL: "Wall",
+    ON_PATH: "Path",
+  };
+
+  const [mode, setMode] = useState(status.NEUTRAL);
 */
