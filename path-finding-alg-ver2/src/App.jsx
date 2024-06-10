@@ -3,7 +3,6 @@ import "./App.scss";
 
 const VisitedNodesContext = createContext();
 
-// Luo Provider-komponentti visitedNodes:lle
 const VisitedNodesProvider = ({ children }) => {
   const [visitedNodes, setVisitedNodes] = useState(new Set());
   return (
@@ -15,11 +14,6 @@ const VisitedNodesProvider = ({ children }) => {
 
 const useVisitedNodes = () => {
   const context = useContext(VisitedNodesContext);
-  if (context === undefined) {
-    throw new Error(
-      "useVisitedNodes must be used within a VisitedNodesProvider"
-    );
-  }
   return context;
 };
 
