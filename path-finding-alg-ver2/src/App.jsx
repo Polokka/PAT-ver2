@@ -1,35 +1,27 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext, createContext } from "react";
 import "./App.scss";
 
-/*
-TOP LEVEL STUFF
+const VisitedNodesContext = createContext();
 
-grid variables
+// Luo Provider-komponentti visitedNodes:lle
+const VisitedNodesProvider = ({ children }) => {
+  const [visitedNodes, setVisitedNodes] = useState(new Set());
+  return (
+    <VisitedNodesContext.Provider value={{ visitedNodes, setVisitedNodes }}>
+      {children}
+    </VisitedNodesContext.Provider>
+  );
+};
 
-
-BUILT A GRID COMPONENT
-
-Parametrit: Rows ja cols
-Return: GridObject {Row0 { Col0, Col1, ...} Row1 { Col0, Col1, ...} ...}
-
-
-COMPONENTTI JOKA VASTAAN OTTAA GRIDIN, JA LUO NODEJEN ARVOT
-
-Parametrit: GridObject
-Return: Jokaiselle nodelle: Status(Neutral, start, end, wall), id, key, neighbours
-
-MAIN COMPONENT/APP
-
-Default componentti, antaa käskyn gridin luomiselle.
-Muokataan/Annetaan classNamet
-
-Return osa: <div>GridDiv</div><div>OnClick functiot eri toiminnoille(Gridin arvojen muuttaminen, algorytmin valinta)</div>
-
-
-ALGORYMIT
-
-Mitä näitä ny on
-*/
+const useVisitedNodes = () => {
+  const context = useContext(VisitedNodesContext);
+  if (context === undefined) {
+    throw new Error(
+      "useVisitedNodes must be used within a VisitedNodesProvider"
+    );
+  }
+  return context;
+};
 
 const GridNodes = ({ cols, rows }) => {
   let grid = {};
@@ -39,34 +31,36 @@ const GridNodes = ({ cols, rows }) => {
     grid[rowKey] = {};
     for (let j = 0; j < cols; j++) {
       let nodeKey = `Col${j}`;
-      grid[rowKey][nodeKey] = { Id: i * cols + j, Status: "" };
+      grid[rowKey][nodeKey] = { Id: i * cols + j };
     }
   }
-  console.log(grid);
   return grid;
 };
 
 function App() {
-  const cols = 15;
-  const rows = 15;
+  const cols = 20;
+  const rows = 20;
 
   const grid = GridNodes({ cols, rows });
 
   //Status Click&Drag
   const [startRef, setStartRef] = useState(0);
-  const [endRef, setEndRef] = useState(10);
+  const [endRef, setEndRef] = useState(15);
   const [draggingStart, setDraggingStart] = useState(false);
   const [draggingEnd, setDraggingEnd] = useState(false);
   const [draggingWall, setDraggingWall] = useState(false);
   const [wallNodes, setWallNodes] = useState([]);
 
   function tileColorClassSelection(colIndex) {
-    if (colIndex == startRef) {
-      return "startNode";
+    if (visitedNodes.has(colIndex)) {
+      return "visitedNode";
     } else if (colIndex == endRef) {
       return "endNode";
     } else if (wallNodes.includes(colIndex)) {
+      console.log("kissa");
       return "wallNode";
+    } else if (colIndex == startRef) {
+      return "startNode";
     } else {
       return "neutralNode";
     }
@@ -77,6 +71,9 @@ function App() {
       setDraggingStart(true);
     } else if (nodeId == endRef) {
       setDraggingEnd(true);
+    } else if (wallNodes.includes(nodeId)) {
+      setDraggingWall(true);
+      setWallNodes(wallNodes.filter((node) => node !== nodeId));
     } else if (nodeId) {
       setDraggingWall(true);
       setWallNodes([...wallNodes, nodeId]);
@@ -96,6 +93,8 @@ function App() {
       setEndRef(nodeId);
     } else if (draggingWall && !wallNodes.includes(nodeId)) {
       setWallNodes([...wallNodes, nodeId]);
+    } else if (draggingWall && wallNodes.includes(nodeId)) {
+      setWallNodes(wallNodes.filter((node) => node !== nodeId));
     }
   };
 
@@ -110,11 +109,32 @@ function App() {
   };
 
   const gridArray = Object.values(grid).map((row) => Object.values(row));
+  const { visitedNodes, setVisitedNodes } = useVisitedNodes();
+
+  useEffect(() => {
+    console.log(visitedNodes);
+  }, [visitedNodes]);
 
   return (
     <>
-      <div className="topBar" onClick={() => clearWall()}>
-        ClearButton
+      <div className="topBar">
+        <button onClick={() => clearWall()}>Clear walls Button</button>
+        <button
+          onClick={async () => {
+            await DijkstrasAlg(
+              startRef,
+              endRef,
+              cols,
+              rows,
+              wallNodes,
+              visitedNodes,
+              setVisitedNodes
+            );
+            console.log(visitedNodes);
+          }}
+        >
+          Dijkstra's Algorithm
+        </button>
       </div>
       <div className="gridHolder" onMouseLeave={handleMouseLeave}>
         {gridArray.map((row, rowIndex) => (
@@ -122,7 +142,7 @@ function App() {
             {row.map((cell, colIndex) => (
               <div
                 key={`Col${colIndex}`}
-                className={`${tileColorClassSelection(cell.Id)} gridCell`}
+                className={`${tileColorClassSelection(cell.Id)} gridCell `}
                 onMouseDown={() => handleMouseDown(cell.Id)}
                 onMouseUp={handleMouseUp}
                 onMouseEnter={() => handleMouseEnter(cell.Id)}
@@ -135,7 +155,87 @@ function App() {
   );
 }
 
-export default App;
+const DijkstrasAlg = async (
+  startRef,
+  endRef,
+  cols,
+  rows,
+  wallNodes,
+  visitedNodes,
+  setVisitedNodes
+) => {
+  let gridForAlg = {};
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      let node = i * cols + j;
+      gridForAlg[node] = {};
+      // Lisää naapurit ja niiden etäisyydet
+      if (i > 0 && !wallNodes.includes((i - 1) * cols + j))
+        gridForAlg[node][(i - 1) * cols + j] = 1; // yläpuolella
+      if (i < rows - 1 && !wallNodes.includes((i + 1) * cols + j))
+        gridForAlg[node][(i + 1) * cols + j] = 1; // alapuolella
+      if (j > 0 && !wallNodes.includes(i * cols + j - 1))
+        gridForAlg[node][i * cols + j - 1] = 1; // vasemmalla
+      if (j < cols - 1 && !wallNodes.includes(i * cols + j + 1))
+        gridForAlg[node][i * cols + j + 1] = 1; // oikealla
+    }
+  }
+
+  let distances = {},
+    previous = {},
+    unvisited = new Set();
+  for (let node in gridForAlg) {
+    distances[node] = node == startRef ? 0 : Infinity;
+    unvisited.add(node);
+  }
+
+  while (unvisited.size) {
+    let closestNode = null;
+    for (let node of unvisited) {
+      if (!closestNode || distances[node] < distances[closestNode]) {
+        closestNode = node;
+      }
+    }
+
+    if (distances[closestNode] == Infinity) break;
+    if (closestNode == endRef) break;
+
+    for (let neighbor in gridForAlg[closestNode]) {
+      let newDistance =
+        distances[closestNode] + gridForAlg[closestNode][neighbor];
+      if (newDistance < distances[neighbor]) {
+        distances[neighbor] = newDistance;
+        previous[neighbor] = closestNode;
+      }
+    }
+    unvisited.delete(closestNode);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    setVisitedNodes(new Set(Object.keys(previous).map(Number)));
+  }
+
+  let path = [],
+    node = endRef;
+  while (node) {
+    if (node !== endRef) {
+      path.push(node);
+    }
+    node = previous[node];
+  }
+  console.log(path);
+  return path.reverse();
+};
+
+const DefaultExport = () => {
+  return (
+    <>
+      <VisitedNodesProvider>
+        <App />
+      </VisitedNodesProvider>
+    </>
+  );
+};
+export default DefaultExport;
 
 /*switch (mode) {
   case "Neutral":
@@ -184,4 +284,17 @@ export default App;
   };
 
   const [mode, setMode] = useState(status.NEUTRAL);
+
+
+    for (let rowKey in grid) {
+    for (let colKey in grid[rowKey]) {
+      let newKey = `${rowKey}${colKey}`;
+      gridForAlg[newKey] = grid[rowKey][colKey];
+    }
+  }
+
+
+    const visitedNodes = "";${
+    visitedNodes.has(cell.Id) ? "visitedNode" : ""
+  }
 */
