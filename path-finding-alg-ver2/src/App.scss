@@ -5,12 +5,11 @@
     user-select: none;
   }
     .topBar {
-    height: 60px;
+    height: 10px;
   }
   
   .gridHolder {
     display: flex;
-    background-color: aqua;
     justify-content: center;
     margin: 2% 10%;
     height: 500px;
@@ -20,8 +19,8 @@
 
   .gridCell {
   
-    width: 47px;
-    height: 30px;
+    width: 37px;
+    height: 20px;
     outline: 1px solid rgb(0, 0, 0);
     padding-top: 15px;
     text-align: center;
@@ -47,4 +46,8 @@
 
   .visitedNode {
     background-color: blue;
+  }
+
+  .pathNode {
+    background-color: violet;
   }

@@ -32,8 +32,9 @@ const GridNodes = ({ cols, rows }) => {
 };
 
 function App() {
-  const cols = 20;
-  const rows = 20;
+  0;
+  const cols = 25;
+  const rows = 25;
 
   const grid = GridNodes({ cols, rows });
 
@@ -46,8 +47,8 @@ function App() {
   const [wallNodes, setWallNodes] = useState([]);
 
   function tileColorClassSelection(colIndex) {
-    if (visitedNodes.has(colIndex)) {
-      return "visitedNode";
+    if (algPath.includes(colIndex)) {
+      return "pathNode";
     } else if (colIndex == endRef) {
       return "endNode";
     } else if (wallNodes.includes(colIndex)) {
@@ -55,6 +56,8 @@ function App() {
       return "wallNode";
     } else if (colIndex == startRef) {
       return "startNode";
+    } else if (visitedNodes.has(colIndex)) {
+      return "visitedNode";
     } else {
       return "neutralNode";
     }
@@ -102,12 +105,10 @@ function App() {
     setWallNodes([]);
   };
 
+  const [algPath, setAlgPath] = useState([]);
+
   const gridArray = Object.values(grid).map((row) => Object.values(row));
   const { visitedNodes, setVisitedNodes } = useVisitedNodes();
-
-  useEffect(() => {
-    console.log(visitedNodes);
-  }, [visitedNodes]);
 
   return (
     <>
@@ -122,7 +123,9 @@ function App() {
               rows,
               wallNodes,
               visitedNodes,
-              setVisitedNodes
+              setVisitedNodes,
+              algPath,
+              setAlgPath
             );
             console.log(visitedNodes);
           }}
@@ -156,7 +159,9 @@ const DijkstrasAlg = async (
   rows,
   wallNodes,
   visitedNodes,
-  setVisitedNodes
+  setVisitedNodes,
+  algPath,
+  setAlgPath
 ) => {
   let gridForAlg = {};
 
@@ -204,7 +209,7 @@ const DijkstrasAlg = async (
       }
     }
     unvisited.delete(closestNode);
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 25));
     setVisitedNodes(new Set(Object.keys(previous).map(Number)));
   }
 
@@ -215,8 +220,9 @@ const DijkstrasAlg = async (
       path.push(node);
     }
     node = previous[node];
+    setAlgPath(path.map(Number));
   }
-  console.log(path);
+
   return path.reverse();
 };
 
