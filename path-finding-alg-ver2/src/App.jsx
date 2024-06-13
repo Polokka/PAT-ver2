@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useContext, createContext } from "react";
 import "./App.scss";
+import { DijkstrasAlg } from "./DijkstrasAlg";
+import { aStar } from "./A-starAlg";
 
 const VisitedNodesContext = createContext();
 
@@ -102,7 +104,7 @@ function App() {
 
   //ClearButtons
   const clearWall = () => {
-    if (isRunningRef.current) {
+    if (isRunningDijkstraRef.current || isRunningAStarRef.current) {
       return;
     }
     setWallNodes([]);
@@ -120,16 +122,27 @@ function App() {
   const gridArray = Object.values(grid).map((row) => Object.values(row));
   const { visitedNodes, setVisitedNodes } = useVisitedNodes();
 
-  const [isRunning, setIsRunning] = useState(false);
-
-  const isRunningRef = useRef(isRunning);
-
-  useEffect(() => {
-    isRunningRef.current = isRunning;
-  }, [isRunning]);
+  //Dijkstra isRunning states
+  const [isRunningDijkstra, setIsRunningDijkstra] = useState(false);
+  const isRunningDijkstraRef = useRef(isRunningDijkstra);
 
   useEffect(() => {
-    if (isRunning) {
+    isRunningDijkstraRef.current = isRunningDijkstra;
+  }, [isRunningDijkstra]);
+
+  //A-Star isRunning states
+  const [isRunningAStar, setIsRunningAStar] = useState(false);
+  const isRunningAStarRef = useRef(isRunningAStar);
+
+  useEffect(() => {
+    isRunningAStarRef.current = isRunningAStar;
+  }, [isRunningAStar]);
+
+  useEffect(() => {
+    if (isRunningAStar) {
+      return;
+    }
+    if (isRunningDijkstra) {
       clearVisitedNodes();
       DijkstrasAlg(
         startRef,
@@ -141,32 +154,69 @@ function App() {
         setVisitedNodes,
         algPath,
         setAlgPath,
-        isRunningRef,
-        setIsRunning
+        isRunningDijkstraRef,
+        setIsRunningDijkstra
       );
     }
-  }, [isRunning]);
+  }, [isRunningDijkstra]);
+
+  useEffect(() => {
+    if (isRunningDijkstra) {
+      return;
+    }
+    if (isRunningAStar) {
+      clearVisitedNodes();
+      aStar(
+        startRef,
+        endRef,
+        cols,
+        rows,
+        wallNodes,
+        visitedNodes,
+        setVisitedNodes,
+        algPath,
+        setAlgPath,
+        isRunningAStarRef,
+        setIsRunningAStar
+      );
+    }
+  }, [isRunningAStar]);
 
   return (
     <>
       <div className="topBar">
         <button className="topBarItem" onClick={() => clearWall()}>
-          Clear walls Button
+          Clear walls
         </button>
         <button className="topBarItem" onClick={() => clearVisitedNodes()}>
-          Clear Algorithm
+          Clear Alg Visualization
         </button>
         <button
           className="topBarItem"
           onClick={async () => {
-            setIsRunning(false);
-            setTimeout(() => setIsRunning(true));
+            setIsRunningDijkstra(false);
+            setTimeout(() => setIsRunningDijkstra(true));
           }}
         >
           Dijkstra's Algorithm
         </button>
-        <button className="topBarItem" onClick={() => setIsRunning(false)}>
-          Stop Algorithm
+        <button
+          className="topBarItem"
+          onClick={async () => {
+            setIsRunningAStar(false);
+            setTimeout(() => setIsRunningAStar(true));
+          }}
+        >
+          A* Algorithm
+        </button>
+        <button
+          className="topBarItem"
+          onClick={() => {
+            setIsRunningAStar(false);
+            setIsRunningDijkstra(false);
+          }}
+        >
+          Stop Algorithms
         </button>
         <p className="topBarItem">
           Instructions: Start(yellow) and end(red) are draggable with mouse.
@@ -192,84 +242,6 @@ function App() {
     </>
   );
 }
-
-const DijkstrasAlg = async (
-  startRef,
-  endRef,
-  cols,
-  rows,
-  wallNodes,
-  visitedNodes,
-  setVisitedNodes,
-  algPath,
-  setAlgPath,
-  isRunningRef,
-  setIsRunning
-) => {
-  let gridForAlg = {};
-
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      let node = i * cols + j;
-      gridForAlg[node] = {};
-      // Lisää naapurit ja niiden etäisyydet
-      if (i > 0 && !wallNodes.includes((i - 1) * cols + j))
-        gridForAlg[node][(i - 1) * cols + j] = 1; // yläpuolella
-      if (i < rows - 1 && !wallNodes.includes((i + 1) * cols + j))
-        gridForAlg[node][(i + 1) * cols + j] = 1; // alapuolella
-      if (j > 0 && !wallNodes.includes(i * cols + j - 1))
-        gridForAlg[node][i * cols + j - 1] = 1; // vasemmalla
-      if (j < cols - 1 && !wallNodes.includes(i * cols + j + 1))
-        gridForAlg[node][i * cols + j + 1] = 1; // oikealla
-    }
-  }
-
-  let distances = {},
-    previous = {},
-    unvisited = new Set();
-  for (let node in gridForAlg) {
-    distances[node] = node == startRef ? 0 : Infinity;
-    unvisited.add(node);
-  }
-
-  while (unvisited.size) {
-    let closestNode = null;
-    for (let node of unvisited) {
-      if (!closestNode || distances[node] < distances[closestNode]) {
-        closestNode = node;
-      }
-    }
-
-    if (distances[closestNode] == Infinity) break;
-    if (closestNode == endRef) break;
-
-    for (let neighbor in gridForAlg[closestNode]) {
-      if (!isRunningRef.current) {
-        return;
-      }
-      let newDistance =
-        distances[closestNode] + gridForAlg[closestNode][neighbor];
-      if (newDistance < distances[neighbor]) {
-        distances[neighbor] = newDistance;
-        previous[neighbor] = closestNode;
-      }
-    }
-    unvisited.delete(closestNode);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    setVisitedNodes(new Set(Object.keys(previous).map(Number)));
-  }
-
-  let path = [],
-    node = endRef;
-  while (node) {
-    path.push(node);
-
-    node = previous[node];
-    setAlgPath(path.map(Number));
-  }
-  setIsRunning(false);
-  return path.reverse();
-};
 
 const DefaultExport = () => {
   return (
