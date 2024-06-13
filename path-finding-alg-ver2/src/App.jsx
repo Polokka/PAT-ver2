@@ -33,29 +33,28 @@ const GridNodes = ({ cols, rows }) => {
 
 function App() {
   0;
-  const cols = 25;
-  const rows = 25;
+  const cols = 40;
+  const rows = 85;
 
   const grid = GridNodes({ cols, rows });
 
   //Status Click&Drag
-  const [startRef, setStartRef] = useState(0);
-  const [endRef, setEndRef] = useState(15);
+  const [startRef, setStartRef] = useState(1256);
+  const [endRef, setEndRef] = useState(1896);
   const [draggingStart, setDraggingStart] = useState(false);
   const [draggingEnd, setDraggingEnd] = useState(false);
   const [draggingWall, setDraggingWall] = useState(false);
   const [wallNodes, setWallNodes] = useState([]);
 
   function tileColorClassSelection(colIndex) {
-    if (algPath.includes(colIndex)) {
-      return "pathNode";
+    if (colIndex == startRef) {
+      return "startNode";
     } else if (colIndex == endRef) {
       return "endNode";
     } else if (wallNodes.includes(colIndex)) {
-      console.log("kissa");
       return "wallNode";
-    } else if (colIndex == startRef) {
-      return "startNode";
+    } else if (algPath.includes(colIndex)) {
+      return "pathNode";
     } else if (visitedNodes.has(colIndex)) {
       return "visitedNode";
     } else {
@@ -101,37 +100,79 @@ function App() {
     setDraggingWall(false);
   };
 
+  //ClearButtons
   const clearWall = () => {
+    if (isRunningRef.current) {
+      return;
+    }
     setWallNodes([]);
   };
+
+  const clearVisitedNodes = () => {
+    setVisitedNodes(new Set());
+    setAlgPath([]);
+  };
+
+  //Alg things
 
   const [algPath, setAlgPath] = useState([]);
 
   const gridArray = Object.values(grid).map((row) => Object.values(row));
   const { visitedNodes, setVisitedNodes } = useVisitedNodes();
 
+  const [isRunning, setIsRunning] = useState(false);
+
+  const isRunningRef = useRef(isRunning);
+
+  useEffect(() => {
+    isRunningRef.current = isRunning;
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (isRunning) {
+      clearVisitedNodes();
+      DijkstrasAlg(
+        startRef,
+        endRef,
+        cols,
+        rows,
+        wallNodes,
+        visitedNodes,
+        setVisitedNodes,
+        algPath,
+        setAlgPath,
+        isRunningRef,
+        setIsRunning
+      );
+    }
+  }, [isRunning]);
+
   return (
     <>
       <div className="topBar">
-        <button onClick={() => clearWall()}>Clear walls Button</button>
+        <button className="topBarItem" onClick={() => clearWall()}>
+          Clear walls Button
+        </button>
+        <button className="topBarItem" onClick={() => clearVisitedNodes()}>
+          Clear Algorithm
+        </button>
         <button
+          className="topBarItem"
           onClick={async () => {
-            await DijkstrasAlg(
-              startRef,
-              endRef,
-              cols,
-              rows,
-              wallNodes,
-              visitedNodes,
-              setVisitedNodes,
-              algPath,
-              setAlgPath
-            );
-            console.log(visitedNodes);
+            setIsRunning(false);
+            setTimeout(() => setIsRunning(true));
           }}
         >
           Dijkstra's Algorithm
         </button>
+        <button className="topBarItem" onClick={() => setIsRunning(false)}>
+          Stop Algorithm
+        </button>
+        <p className="topBarItem">
+          Instructions: Start(yellow) and end(red) are draggable with mouse.
+          Paste walls by clicking/holding empty node/nodes, and remove them by
+          clicking/holding.
+        </p>
       </div>
       <div className="gridHolder" onMouseLeave={handleMouseLeave}>
         {gridArray.map((row, rowIndex) => (
@@ -161,7 +202,9 @@ const DijkstrasAlg = async (
   visitedNodes,
   setVisitedNodes,
   algPath,
-  setAlgPath
+  setAlgPath,
+  isRunningRef,
+  setIsRunning
 ) => {
   let gridForAlg = {};
 
@@ -201,6 +244,9 @@ const DijkstrasAlg = async (
     if (closestNode == endRef) break;
 
     for (let neighbor in gridForAlg[closestNode]) {
+      if (!isRunningRef.current) {
+        return;
+      }
       let newDistance =
         distances[closestNode] + gridForAlg[closestNode][neighbor];
       if (newDistance < distances[neighbor]) {
@@ -209,20 +255,19 @@ const DijkstrasAlg = async (
       }
     }
     unvisited.delete(closestNode);
-    await new Promise((resolve) => setTimeout(resolve, 25));
+    await new Promise((resolve) => setTimeout(resolve, 0));
     setVisitedNodes(new Set(Object.keys(previous).map(Number)));
   }
 
   let path = [],
     node = endRef;
   while (node) {
-    if (node !== endRef) {
-      path.push(node);
-    }
+    path.push(node);
+
     node = previous[node];
     setAlgPath(path.map(Number));
   }
-
+  setIsRunning(false);
   return path.reverse();
 };
 

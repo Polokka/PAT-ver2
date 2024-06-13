@@ -4,36 +4,53 @@
     -ms-user-select: none;
     user-select: none;
   }
+
+  body {
+    background-color: rgb(174, 238, 208, 0.5);
+  }
     .topBar {
-    height: 10px;
+    height: 55px;
+  }
+
+  .topBarItem {
+    margin: 5px 10px;
+    height: 40px;
+    font-family: 'Courier', sans-serif;
+
   }
   
   .gridHolder {
     display: flex;
-    justify-content: center;
-    margin: 2% 10%;
-    height: 500px;
+    justify-content: space-around;
+    border-width: 5px;
+    border-style: solid;
+    border-image: linear-gradient(45deg, turquoise, greenyellow) 1;
   }
   
+  .topBar  {
+    display: flex;
+  }
+
+  button {
+    background-color: rgb(221, 139, 81);
+    font-weight: bold;
+  }
 
 
   .gridCell {
   
-    width: 37px;
+    width: 22px;
     height: 20px;
     outline: 1px solid rgb(0, 0, 0);
-    padding-top: 15px;
-    text-align: center;
-   
-  
   }
   
   .startNode {
-    background-color: green;
+    background-color: rgb(255, 242, 63);
   }
 
   .neutralNode {
-    background-color: yellow;
+    background-color: rgb(82, 233, 102);
+    opacity: 50%;
   }
 
   .endNode {
@@ -45,9 +62,9 @@
   }
 
   .visitedNode {
-    background-color: blue;
+    background-color: rgb(47, 47, 167);
   }
 
   .pathNode {
-    background-color: violet;
+    background-color: rgb(248, 27, 193);
   }
