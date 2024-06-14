@@ -9,7 +9,6 @@ function heuristic(node, endNode) {
 //Muunnetaan node coordinaateiksi
 function toCoords(ref, cols) {
   let y = Math.floor(ref / cols);
-  console.log(cols);
   let x = ref % cols;
   return { x: x, y: y };
 }
@@ -26,7 +25,8 @@ export const aStar = async (
   algPath,
   setAlgPath,
   isRunningAStarRef,
-  setIsRunningAStar
+  setIsRunningAStar,
+  setResultText
 ) => {
   let openSet = [startRef];
 
@@ -66,6 +66,7 @@ export const aStar = async (
 
   while (openSet.length > 0) {
     if (!isRunningAStarRef.current) {
+      setResultText("Algorithm was stopped");
       return;
     }
     let current = openSet.reduce((a, b) => (fScore[a] < fScore[b] ? a : b));
@@ -77,6 +78,7 @@ export const aStar = async (
         temp = cameFrom[temp];
       }
       setAlgPath(path.map(Number));
+      setResultText("Path was found");
       setIsRunningAStar(false);
       return;
     }
@@ -87,6 +89,7 @@ export const aStar = async (
 
     for (let neighbor in gridForAlg[current]) {
       if (!isRunningAStarRef.current) {
+        setResultText("Algorithm was stopped");
         return;
       }
       let tentativeGScore = gScore[current] + 1;
@@ -102,9 +105,14 @@ export const aStar = async (
     }
     await new Promise((resolve) => setTimeout(resolve, 0));
     if (!isRunningAStarRef.current) {
+      setResultText("Algorithm was stopped");
       return;
     }
     setVisitedNodes(new Set(Object.keys(cameFrom).map(Number)));
   }
-  setIsRunningAStar(false);
+  if (openSet.length === 0) {
+    setResultText("Algorithm did not find a path");
+    setIsRunningAStar(false);
+    return;
+  }
 };

@@ -130,14 +130,6 @@ function App() {
     isRunningDijkstraRef.current = isRunningDijkstra;
   }, [isRunningDijkstra]);
 
-  //A-Star isRunning states
-  const [isRunningAStar, setIsRunningAStar] = useState(false);
-  const isRunningAStarRef = useRef(isRunningAStar);
-
-  useEffect(() => {
-    isRunningAStarRef.current = isRunningAStar;
-  }, [isRunningAStar]);
-
   useEffect(() => {
     if (isRunningAStar) {
       return;
@@ -155,10 +147,19 @@ function App() {
         algPath,
         setAlgPath,
         isRunningDijkstraRef,
-        setIsRunningDijkstra
+        setIsRunningDijkstra,
+        setResultText
       );
     }
   }, [isRunningDijkstra]);
+
+  //A-Star isRunning states
+  const [isRunningAStar, setIsRunningAStar] = useState(false);
+  const isRunningAStarRef = useRef(isRunningAStar);
+
+  useEffect(() => {
+    isRunningAStarRef.current = isRunningAStar;
+  }, [isRunningAStar]);
 
   useEffect(() => {
     if (isRunningDijkstra) {
@@ -177,10 +178,13 @@ function App() {
         algPath,
         setAlgPath,
         isRunningAStarRef,
-        setIsRunningAStar
+        setIsRunningAStar,
+        setResultText
       );
     }
   }, [isRunningAStar]);
+
+  const [resultText, setResultText] = useState("Status");
 
   return (
     <>
@@ -218,11 +222,12 @@ function App() {
         >
           Stop Algorithms
         </button>
-        <p className="topBarItem">
+        <p className="topBarItem instructions">
           Instructions: Start(yellow) and end(red) are draggable with mouse.
           Paste walls by clicking/holding empty node/nodes, and remove them by
           clicking/holding.
         </p>
+        <div className="topBarItem resultText">{resultText}</div>
       </div>
       <div className="gridHolder" onMouseLeave={handleMouseLeave}>
         {gridArray.map((row, rowIndex) => (

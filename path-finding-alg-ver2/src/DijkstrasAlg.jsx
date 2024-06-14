@@ -9,7 +9,8 @@ export const DijkstrasAlg = async (
   algPath,
   setAlgPath,
   isRunningDijkstraRef,
-  setIsRunningDijkstra
+  setIsRunningDijkstra,
+  setResultText
 ) => {
   let gridForAlg = {};
 
@@ -45,11 +46,19 @@ export const DijkstrasAlg = async (
       }
     }
 
-    if (distances[closestNode] == Infinity) break;
-    if (closestNode == endRef) break;
+    if (distances[closestNode] == Infinity) {
+      setResultText("Algorithm dit not find a path");
+      setIsRunningDijkstra(false);
+      break;
+    }
+    if (closestNode == endRef) {
+      setResultText("Path was found");
+      break;
+    }
 
     for (let neighbor in gridForAlg[closestNode]) {
       if (!isRunningDijkstraRef.current) {
+        setResultText("Algorithm was stopped");
         return;
       }
       let newDistance =
@@ -72,6 +81,7 @@ export const DijkstrasAlg = async (
     node = previous[node];
     setAlgPath(path.map(Number));
   }
+
   setIsRunningDijkstra(false);
   return path.reverse();
 };

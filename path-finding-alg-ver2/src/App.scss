@@ -16,7 +16,18 @@
     margin: 5px 10px;
     height: 40px;
     font-family: 'Courier', sans-serif;
+  }
 
+  .instructions {
+    max-width: 47rem;
+  }
+
+  .resultText {
+    display: flex;
+    outline: 2px solid rgb(0, 0, 0);
+    width: 30rem;
+    justify-content: center;
+    align-items: center;
   }
   
   .gridHolder {
