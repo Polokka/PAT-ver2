@@ -5,35 +5,55 @@
     user-select: none;
   }
 
+  html {
+    height: 100wv;
+    width: 100vw
+  }
+
+
   body {
     background-color: rgb(174, 238, 208, 0.5);
+    padding: 0;;
+    margin: 0;
   }
-    .topBar {
-    height: 55px;
+
+  .topBar {
+    height: 3vw;
+    display: flex;
+    justify-content: space-between;
+    overflow:auto
   }
 
   .topBarItem {
-    margin: 5px 10px;
-    height: 40px;
+    margin: 0.2vw 1vw;
+    height: 2.2vw;
     font-family: 'Courier', sans-serif;
+    font-size: 0.75vw;
+  }
+
+  .topBarItem:first-child {
+    margin-left: 2.3vw;
   }
 
   .instructions {
-    max-width: 47rem;
+    font-weight: bold;
+    margin-top: 0.6vw;
   }
 
   .resultText {
     display: flex;
-    outline: 2px solid rgb(0, 0, 0);
-    width: 30rem;
+    outline: 0.2vw solid rgb(0, 0, 0);
+    width: 26vw;
     justify-content: center;
     align-items: center;
+    font-size: 1vw;
+    margin-right: 2.3vw;
   }
   
   .gridHolder {
     display: flex;
     justify-content: space-around;
-    border-width: 5px;
+    border-width: 0.3vw;
     border-style: solid;
     border-image: linear-gradient(45deg, turquoise, greenyellow) 1;
   }
@@ -45,14 +65,18 @@
   button {
     background-color: rgb(221, 139, 81);
     font-weight: bold;
+    outline: 0.1vw groove black;
+    padding: 0.5em; /* Skaalautuva padding */
+    border: 0.1em solid black; /* Skaalautuva border */
+    box-sizing: border-box; /* Sisällyttää paddingin ja borderin kokonaisleveyteen */
   }
 
 
   .gridCell {
   
-    width: 22px;
-    height: 20px;
-    outline: 1px solid rgb(0, 0, 0);
+    width: 1.1vw;
+    height: 1.05vw;
+    outline: 0.1vw solid rgb(0, 0, 0);
   }
   
   .startNode {

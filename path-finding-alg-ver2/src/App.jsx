@@ -135,6 +135,7 @@ function App() {
       return;
     }
     if (isRunningDijkstra) {
+      setResultText("Running");
       clearVisitedNodes();
       DijkstrasAlg(
         startRef,
@@ -166,6 +167,7 @@ function App() {
       return;
     }
     if (isRunningAStar) {
+      setResultText("Running");
       clearVisitedNodes();
       aStar(
         startRef,
